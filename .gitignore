@@ -105,3 +105,4 @@ venv.bak/
 
 # Pickle dumps
 *.pkl
+idx_save.pkl
