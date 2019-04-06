@@ -13,6 +13,7 @@ dataset. The following steps are used:
 
 from sys import argv
 from index import InvertedIndex, index_newsgroups
+from os import listdir
 
 # Get input args
 newsgroups_root_dir = argv[1]
@@ -31,5 +32,23 @@ with open(feat_def_path, 'w') as outf:
     for item in ii.items:
         outf.write(str(feature_id) + "," + str(item) + "\n")
         feature_id += 1
+        
+# Map the different newsgroups to a given class
+# This is fairly manual...
+with open(class_def_path, 'w') as outf:
+    for dir in listdir(newsgroups_root_dir):
+        if dir.startswith("comp"):
+            outf.write("computing," + dir + "\n")
+        elif dir.startswith("rec"):
+            outf.write("recreation," + dir + "\n")
+        elif dir.startswith("sci"):
+            outf.write("science," + dir + "\n")
+        elif dir.startswith("misc"):
+            outf.write("miscellaneous," + dir + "\n")
+        elif dir.startswith("talk.politics"):
+            outf.write("politics," + dir + "\n")
+        else:
+            outf.write("religion," + dir + "\n")
+
 
 
