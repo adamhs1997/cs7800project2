@@ -74,7 +74,7 @@ class InvertedIndex:
 
     def __init__(self):
         self.items = {} # list of IndexItems
-        self.doc_tfidf = {} # tf-idf of every term in every doc
+        #self.doc_tfidf = {} # tf-idf of every term in every doc
         self.nDocs = 0  # the number of indexed documents
 
 
@@ -162,7 +162,7 @@ class InvertedIndex:
         # ToDo: using your preferred method to serialize/deserialize the index
         
         # Combine items dict and nDocs into a list so they can be pickled together
-        to_pickle = [self.items, self.nDocs, self.doc_tfidf]
+        to_pickle = [self.items, self.nDocs]#, self.doc_tfidf]
         
         # Use Pickle to dump the index to a file
         with open(filename, 'wb') as out:
@@ -177,7 +177,7 @@ class InvertedIndex:
             file_read = load(inf)
             self.items = file_read[0]
             self.nDocs = file_read[1]
-            self.doc_tfidf = file_read[2]
+            #self.doc_tfidf = file_read[2]
 
     def idf(self, term):
         ''' compute the inverted document frequency for a given term'''
@@ -221,6 +221,8 @@ class InvertedIndex:
     
     
 def index_newsgroups(root_newsgroup_dir, save_location):
+    print("Building index...")
+
     # Index each doc in the dataset
     ii = InvertedIndex()
     for root, _, files in walk(root_newsgroup_dir):
