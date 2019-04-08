@@ -1,20 +1,20 @@
-religion,alt.atheism
-computing,comp.graphics
-computing,comp.os.ms-windows.misc
-computing,comp.sys.ibm.pc.hardware
-computing,comp.sys.mac.hardware
-computing,comp.windows.x
-miscellaneous,misc.forsale
-recreation,rec.autos
-recreation,rec.motorcycles
-recreation,rec.sport.baseball
-recreation,rec.sport.hockey
-science,sci.crypt
-science,sci.electronics
-science,sci.med
-science,sci.space
-religion,soc.religion.christian
-politics,talk.politics.guns
-politics,talk.politics.mideast
-politics,talk.politics.misc
-religion,talk.religion.misc
+religion alt.atheism
+computing comp.graphics
+computing comp.os.ms-windows.misc
+computing comp.sys.ibm.pc.hardware
+computing comp.sys.mac.hardware
+computing comp.windows.x
+miscellaneous misc.forsale
+recreation rec.autos
+recreation rec.motorcycles
+recreation rec.sport.baseball
+recreation rec.sport.hockey
+science sci.crypt
+science sci.electronics
+science sci.med
+science sci.space
+religion soc.religion.christian
+politics talk.politics.guns
+politics talk.politics.mideast
+politics talk.politics.misc
+religion talk.religion.misc
