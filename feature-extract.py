@@ -14,9 +14,15 @@ dataset. The following steps are used:
 from sys import argv
 from index import InvertedIndex, index_newsgroups
 from os import listdir, walk, sep
+from math import log10
 import util
 
 def main():
+
+    #########
+    # SETUP #
+    #########
+    
     # Get input args
     newsgroups_root_dir = argv[1]
     feat_def_path = argv[2]
@@ -51,6 +57,10 @@ def main():
         for dir in listdir(newsgroups_root_dir):
             outf.write(class_def_helper(dir) + " " + dir + "\n")
 
+    ############################
+    # TRAINING DATA GENERATION #
+    ############################
+            
     # Create the training data
     # For each document:
         # Find its containing folder, and extract class from class def
@@ -60,7 +70,40 @@ def main():
     with open(training_data_path, 'w') as outf:
         if feature_value_type == 0:
             # Compute tf-idf
-            pass
+            # Go through each document in newsgroups dir
+            for root, _, files in walk(newsgroups_root_dir):
+                # Find and write out the class label
+                local_dir = root.split(sep)[-1]
+                
+                # For each file...
+                for file in files:
+                    outf.write(class_def_helper(local_dir) + " ")
+                    print(root, file)
+                    
+                    # Get the words from the doc
+                    stemmed_token_list = preprocess_doc(root + sep + file)
+                    
+                    # Now that we've re-done all that, find idfs
+                    for word in stemmed_token_list:
+                        # Skip blank stopwords
+                        if word == "": continue
+                        
+                        # Get the term ID
+                        outf.write(ft_dict[word] + ":")
+
+                        # Calculate and write out TF-IDF
+                        # Note current_file_id is our doc_id
+                        tf = ii.find(word).posting[current_file_id].term_freq()
+                        idf = ii.idf(word)
+                        outf.write(str(log10(1 + tf) * idf) + " ")
+                        
+                    # Write newline to signify end of file
+                    outf.write("\n")
+                    outf.flush()
+                    
+                    # Increment our current doc
+                    current_file_id += 1
+                    
         elif feature_value_type == 1:
             # Compute tf
             # Go through each document in newsgroups dir
@@ -97,7 +140,7 @@ def main():
                     current_file_id += 1
                     
         elif feature_value_type == 2:
-            # compute idf
+            # Compute idf
             # Go through each document in newsgroups dir
             for root, _, files in walk(newsgroups_root_dir):
                 # Find and write out the class label
