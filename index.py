@@ -74,7 +74,7 @@ class InvertedIndex:
 
     def __init__(self):
         self.items = {} # list of IndexItems
-        #self.doc_tfidf = {} # tf-idf of every term in every doc
+        self.doc_tfidf = {} # tf-idf of every term in every doc
         self.nDocs = 0  # the number of indexed documents
 
 
@@ -162,7 +162,7 @@ class InvertedIndex:
         # ToDo: using your preferred method to serialize/deserialize the index
         
         # Combine items dict and nDocs into a list so they can be pickled together
-        to_pickle = [self.items, self.nDocs]#, self.doc_tfidf]
+        to_pickle = [self.items, self.nDocs, self.doc_tfidf]
         
         # Use Pickle to dump the index to a file
         with open(filename, 'wb') as out:
@@ -192,6 +192,7 @@ class InvertedIndex:
         
         # Compute tf-idf vector for every other doc
         for iter in range(self.nDocs):
+            print(iter)
             doc = iter + 1
             word_vector = {}
             
@@ -230,8 +231,10 @@ def index_newsgroups(root_newsgroup_dir, save_location):
             ii.indexDoc(root + "\\" + file)
             
     # Sort and compute TF-IDF
+    print("Index complete! Sorting...")
     ii.sort()
-    #ii.compute_tfidf()
+    print("Sorted! Computing tf-idf...")
+    ii.compute_tfidf()
     
     # Save off index
     ii.save(save_location)

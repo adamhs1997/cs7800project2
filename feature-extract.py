@@ -13,42 +13,143 @@ dataset. The following steps are used:
 
 from sys import argv
 from index import InvertedIndex, index_newsgroups
-from os import listdir
+from os import listdir, walk, sep
+import util
 
-# Get input args
-newsgroups_root_dir = argv[1]
-feat_def_path = argv[2]
-class_def_path = argv[3]
-training_data_path = argv[4]
+def main():
+    # Get input args
+    newsgroups_root_dir = argv[1]
+    feat_def_path = argv[2]
+    class_def_path = argv[3]
+    training_data_path = argv[4]
+    feature_value_type = int(argv[5])
 
-# Generate index
-#index_newsgroups(newsgroups_root_dir, "idx_save.pkl")
-ii = InvertedIndex()
-ii.load("idx_save.pkl")
+    # Generate index
+    #index_newsgroups(newsgroups_root_dir, "idx_save.pkl")
+    ii = InvertedIndex()
+    ii.load("idx_save.pkl")
 
-# Write out feature/term pairs to feat_def_path
-feature_id = 0
-with open(feat_def_path, 'w') as outf:
-    for item in ii.items:
-        outf.write(str(feature_id) + "," + str(item) + "\n")
-        feature_id += 1
+    # Write out feature/term pairs to feat_def_path
+    feature_id = 0
+    with open(feat_def_path, 'w') as outf:
+        for item in ii.items:
+            outf.write(str(feature_id) + " " + str(item) + "\n")
+            feature_id += 1
+    
+    # Read back in the feature/term pairs for later
+    with open(feat_def_path, 'r') as inf:
+        ft_pairs = inf.readlines()
         
-# Map the different newsgroups to a given class
-# This is fairly manual...
-with open(class_def_path, 'w') as outf:
-    for dir in listdir(newsgroups_root_dir):
-        if dir.startswith("comp"):
-            outf.write("computing," + dir + "\n")
-        elif dir.startswith("rec"):
-            outf.write("recreation," + dir + "\n")
-        elif dir.startswith("sci"):
-            outf.write("science," + dir + "\n")
-        elif dir.startswith("misc"):
-            outf.write("miscellaneous," + dir + "\n")
-        elif dir.startswith("talk.politics"):
-            outf.write("politics," + dir + "\n")
+    # Put the ft_pairs into a dictionary for quick lookup
+    ft_dict = {}
+    for pair in ft_pairs:
+        ft_dict[pair.split()[1].strip()] = pair.split()[0]
+            
+    # Map the different newsgroups to a given class
+    # This is fairly manual...
+    with open(class_def_path, 'w') as outf:
+        for dir in listdir(newsgroups_root_dir):
+            outf.write(class_def_helper(dir) + " " + dir + "\n")
+
+    # Create the training data
+    # For each document:
+        # Find its containing folder, and extract class from class def
+        # For each term in document
+            # Compute tfidf, tf or idf
+    current_file_id = 1
+    with open(training_data_path, 'w') as outf:
+        if feature_value_type == 0:
+            # Compute tf-idf
+            pass
+        elif feature_value_type == 1:
+            # Compute tf
+            pass
+        elif feature_value_type == 2:
+            # compute idf
+            # Go through each document in newsgroups dir
+            for root, _, files in walk(newsgroups_root_dir):
+                # Find and write out the class label
+                local_dir = root.split(sep)[-1]
+                
+                # For each file...
+                for file in files:
+                    outf.write(class_def_helper(local_dir) + " ")
+                    print(root, file)
+                    
+                    # Get the words from the doc
+                    stemmed_token_list = preprocess_doc(root + sep + file)
+                    
+                    # Now that we've re-done all that, find idfs
+                    for word in stemmed_token_list:
+                        # Skip blank stopwords
+                        if word == "": continue
+                        
+                        # Get the term ID
+                        outf.write(ft_dict[word] + ":" + str(ii.idf(word))
+                            + " ") 
+                        
+                    # Write newline to signify end of file
+                    outf.write("\n")
+                    outf.flush()
+                    
         else:
-            outf.write("religion," + dir + "\n")
+            print("Invalid feature type! Abort.")
+            exit(1)
+            
+            
+def class_def_helper(dir):
+    """This function returns the class given a dir name"""
+    if dir.startswith("comp"):
+        return "computing"
+    elif dir.startswith("rec"):
+        return "recreation"
+    elif dir.startswith("sci"):
+        return "science"
+    elif dir.startswith("misc"):
+        return "miscellaneous"
+    elif dir.startswith("talk.politics"):
+        return "politics"
+    else:
+        return "religion"
 
-
-
+        
+def preprocess_doc(doc):
+    """Get the words back out of the file"""
+    # Read in doc, only get subject and body of the document
+    with open(doc) as f:
+        doc_lines = f.readlines()
+        
+    sub_body_lines = []
+    for l in doc_lines:
+        if l.startswith("Subject:"):
+            sub_body_lines.append(l[9:].strip())
+        if l.startswith("Lines:"):
+            num_lines = int(l[7:])
+    
+    for l in doc_lines[len(doc_lines) - num_lines:]:
+        if l is not "\n":
+            sub_body_lines.append(l.strip())
+            
+    # Process all the words again
+    # Get doc string
+    doc_string = " ".join(sub_body_lines)
+    
+    # Tokenize and lowercase doc into list form
+    token_list = util.tokenize_doc(doc_string)
+        
+    # Helper function to replace stopwords with empty string
+    def remove_stop_word(tok):
+        return "" if util.isStopWord(tok) else tok
+        
+    # Remove the stopwords from both positional list and token list
+    token_list_no_stopword = list(map(remove_stop_word, token_list))
+    
+    # Stem the words
+    stemmed_token_list = list(map(
+        lambda tok: util.stemming(tok), token_list_no_stopword))
+        
+    return stemmed_token_list
+        
+        
+if __name__ == "__main__":
+    main()
