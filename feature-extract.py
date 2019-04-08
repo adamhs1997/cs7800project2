@@ -63,7 +63,39 @@ def main():
             pass
         elif feature_value_type == 1:
             # Compute tf
-            pass
+            # Go through each document in newsgroups dir
+            for root, _, files in walk(newsgroups_root_dir):
+                # Find and write out the class label
+                local_dir = root.split(sep)[-1]
+                
+                # For each file...
+                for file in files:
+                    outf.write(class_def_helper(local_dir) + " ")
+                    print(root, file)
+                    
+                    # Get the words from the doc
+                    stemmed_token_list = preprocess_doc(root + sep + file)
+                    
+                    # Now that we've re-done all that, find idfs
+                    for word in stemmed_token_list:
+                        # Skip blank stopwords
+                        if word == "": continue
+                        
+                        # Get the term ID
+                        outf.write(ft_dict[word] + ":")
+
+                        # Write the TF
+                        # Note current_file_id is our doc_id
+                        outf.write(str(ii.find(word).posting[
+                            current_file_id].term_freq()) + " ")
+                        
+                    # Write newline to signify end of file
+                    outf.write("\n")
+                    outf.flush()
+                    
+                    # Increment our current doc
+                    current_file_id += 1
+                    
         elif feature_value_type == 2:
             # compute idf
             # Go through each document in newsgroups dir
