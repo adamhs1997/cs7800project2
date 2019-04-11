@@ -83,22 +83,27 @@ def main():
                     # Get the words from the doc
                     stemmed_token_list = preprocess_doc(root + sep + file)
                     
+                    # Put all the info into a set (for uniqueness)
+                    data_set = set()
+                    
                     # Now that we've re-done all that, find idfs
                     for word in stemmed_token_list:
                         # Skip blank stopwords
                         if word == "": continue
                         
                         # Get the term ID
-                        outf.write(ft_dict[word] + ":")
+                        #outf.write(ft_dict[word] + ":")
 
                         # Calculate and write out TF-IDF
                         # Note current_file_id is our doc_id
                         tf = ii.find(word).posting[current_file_id].term_freq()
                         idf = ii.idf(word)
-                        outf.write(str(log10(1 + tf) * idf) + " ")
+                        #outf.write(str(log10(1 + tf) * idf) + " ")
+                        data_set.add(ft_dict[word] + ":" + str(log10(1 + tf) * idf))
                         
                     # Write newline to signify end of file
-                    outf.write("\n")
+                    #outf.write("\n")
+                    outf.write(" ".join(sorted(data_set, key=lambda x: int(x.split(':')[0]))) + "\n")
                     outf.flush()
                     
                     # Increment our current doc
@@ -119,22 +124,28 @@ def main():
                     # Get the words from the doc
                     stemmed_token_list = preprocess_doc(root + sep + file)
                     
+                    # Put all the info into a set (for uniqueness)
+                    data_set = set()
+                    
                     # Now that we've re-done all that, find idfs
                     for word in stemmed_token_list:
                         # Skip blank stopwords
                         if word == "": continue
                         
                         # Get the term ID
-                        outf.write(ft_dict[word] + ":")
+                        #outf.write(ft_dict[word] + ":")
 
                         # Write the TF
                         # Note current_file_id is our doc_id
-                        outf.write(str(ii.find(word).posting[
-                            current_file_id].term_freq()) + " ")
+                        # outf.write(str(ii.find(word).posting[
+                            # current_file_id].term_freq()) + " ")
+                        data_set.add(ft_dict[word] + ":" + str(ii.find(word).posting[
+                            current_file_id].term_freq()))
                         
                     # Write newline to signify end of file
-                    outf.write("\n")
-                    outf.flush()
+                    # outf.write("\n")
+                    outf.write(" ".join(sorted(data_set, key=lambda x: int(x.split(':')[0]))) + "\n")
+                    # outf.flush()
                     
                     # Increment our current doc
                     current_file_id += 1
@@ -154,18 +165,22 @@ def main():
                     # Get the words from the doc
                     stemmed_token_list = preprocess_doc(root + sep + file)
                     
+                    # Put all the info into a set (for uniqueness)
+                    data_set = set()
+                    
                     # Now that we've re-done all that, find idfs
                     for word in stemmed_token_list:
                         # Skip blank stopwords
                         if word == "": continue
                         
                         # Get the term ID
-                        outf.write(ft_dict[word] + ":" + str(ii.idf(word))
-                            + " ") 
+                        #outf.write(ft_dict[word] + ":" + str(ii.idf(word))
+                        #    + " ") 
+                        data_set.add(ft_dict[word] + ":" + str(ii.idf(word)))
                         
                     # Write newline to signify end of file
-                    outf.write("\n")
-                    outf.flush()
+                    outf.write(" ".join(sorted(data_set, key=lambda x: int(x.split(':')[0]))) + "\n")
+                    #outf.flush()
                     
         else:
             print("Invalid feature type! Abort.")
@@ -175,17 +190,17 @@ def main():
 def class_def_helper(dir):
     """This function returns the class given a dir name"""
     if dir.startswith("comp"):
-        return "computing"
+        return "0"
     elif dir.startswith("rec"):
-        return "recreation"
+        return "1"
     elif dir.startswith("sci"):
-        return "science"
+        return "2"
     elif dir.startswith("misc"):
-        return "miscellaneous"
+        return "3"
     elif dir.startswith("talk.politics"):
-        return "politics"
+        return "4"
     else:
-        return "religion"
+        return "5"
 
         
 def preprocess_doc(doc):
