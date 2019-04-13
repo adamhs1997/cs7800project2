@@ -28,7 +28,6 @@ def main():
     feat_def_path = argv[2]
     class_def_path = argv[3]
     training_data_path = argv[4]
-    feature_value_type = int(argv[5])
 
     # Generate index
     #index_newsgroups(newsgroups_root_dir, "idx_save.pkl")
@@ -67,124 +66,120 @@ def main():
         # For each term in document
             # Compute tfidf, tf or idf
     current_file_id = 1
-    with open(training_data_path, 'w') as outf:
-        if feature_value_type == 0:
-            # Compute tf-idf
-            # Go through each document in newsgroups dir
-            for root, _, files in walk(newsgroups_root_dir):
-                # Find and write out the class label
-                local_dir = root.split(sep)[-1]
+    with open(training_data_path + ".TFIDF", 'w') as outf:
+        # Compute tf-idf
+        # Go through each document in newsgroups dir
+        for root, _, files in walk(newsgroups_root_dir):
+            # Find and write out the class label
+            local_dir = root.split(sep)[-1]
+            
+            # For each file...
+            for file in files:
+                outf.write(class_def_helper(local_dir) + " ")
+                print(root, file)
                 
-                # For each file...
-                for file in files:
-                    outf.write(class_def_helper(local_dir) + " ")
-                    print(root, file)
+                # Get the words from the doc
+                stemmed_token_list = preprocess_doc(root + sep + file)
+                
+                # Put all the info into a set (for uniqueness)
+                data_set = set()
+                
+                # Now that we've re-done all that, find idfs
+                for word in stemmed_token_list:
+                    # Skip blank stopwords
+                    if word == "": continue
                     
-                    # Get the words from the doc
-                    stemmed_token_list = preprocess_doc(root + sep + file)
-                    
-                    # Put all the info into a set (for uniqueness)
-                    data_set = set()
-                    
-                    # Now that we've re-done all that, find idfs
-                    for word in stemmed_token_list:
-                        # Skip blank stopwords
-                        if word == "": continue
-                        
-                        # Get the term ID
-                        #outf.write(ft_dict[word] + ":")
+                    # Get the term ID
+                    #outf.write(ft_dict[word] + ":")
 
-                        # Calculate and write out TF-IDF
-                        # Note current_file_id is our doc_id
-                        tf = ii.find(word).posting[current_file_id].term_freq()
-                        idf = ii.idf(word)
-                        #outf.write(str(log10(1 + tf) * idf) + " ")
-                        data_set.add(ft_dict[word] + ":" + str(log10(1 + tf) * idf))
-                        
-                    # Write newline to signify end of file
-                    #outf.write("\n")
-                    outf.write(" ".join(sorted(data_set, key=lambda x: int(x.split(':')[0]))) + "\n")
-                    outf.flush()
+                    # Calculate and write out TF-IDF
+                    # Note current_file_id is our doc_id
+                    tf = ii.find(word).posting[current_file_id].term_freq()
+                    idf = ii.idf(word)
+                    #outf.write(str(log10(1 + tf) * idf) + " ")
+                    data_set.add(ft_dict[word] + ":" + str(log10(1 + tf) * idf))
                     
-                    # Increment our current doc
-                    current_file_id += 1
-                    
-        elif feature_value_type == 1:
-            # Compute tf
-            # Go through each document in newsgroups dir
-            for root, _, files in walk(newsgroups_root_dir):
-                # Find and write out the class label
-                local_dir = root.split(sep)[-1]
+                # Write newline to signify end of file
+                #outf.write("\n")
+                outf.write(" ".join(sorted(data_set, key=lambda x: int(x.split(':')[0]))) + "\n")
+                outf.flush()
                 
-                # For each file...
-                for file in files:
-                    outf.write(class_def_helper(local_dir) + " ")
-                    print(root, file)
+                # Increment our current doc
+                current_file_id += 1
+      
+    current_file_id = 1
+    with open(training_data_path + ".TF", 'w') as outf:
+        # Compute tf
+        # Go through each document in newsgroups dir
+        for root, _, files in walk(newsgroups_root_dir):
+            # Find and write out the class label
+            local_dir = root.split(sep)[-1]
+            
+            # For each file...
+            for file in files:
+                outf.write(class_def_helper(local_dir) + " ")
+                print(root, file)
+                
+                # Get the words from the doc
+                stemmed_token_list = preprocess_doc(root + sep + file)
+                
+                # Put all the info into a set (for uniqueness)
+                data_set = set()
+                
+                # Now that we've re-done all that, find idfs
+                for word in stemmed_token_list:
+                    # Skip blank stopwords
+                    if word == "": continue
                     
-                    # Get the words from the doc
-                    stemmed_token_list = preprocess_doc(root + sep + file)
-                    
-                    # Put all the info into a set (for uniqueness)
-                    data_set = set()
-                    
-                    # Now that we've re-done all that, find idfs
-                    for word in stemmed_token_list:
-                        # Skip blank stopwords
-                        if word == "": continue
-                        
-                        # Get the term ID
-                        #outf.write(ft_dict[word] + ":")
+                    # Get the term ID
+                    #outf.write(ft_dict[word] + ":")
 
-                        # Write the TF
-                        # Note current_file_id is our doc_id
-                        # outf.write(str(ii.find(word).posting[
-                            # current_file_id].term_freq()) + " ")
-                        data_set.add(ft_dict[word] + ":" + str(ii.find(word).posting[
-                            current_file_id].term_freq()))
-                        
-                    # Write newline to signify end of file
-                    # outf.write("\n")
-                    outf.write(" ".join(sorted(data_set, key=lambda x: int(x.split(':')[0]))) + "\n")
-                    # outf.flush()
+                    # Write the TF
+                    # Note current_file_id is our doc_id
+                    # outf.write(str(ii.find(word).posting[
+                        # current_file_id].term_freq()) + " ")
+                    data_set.add(ft_dict[word] + ":" + str(ii.find(word).posting[
+                        current_file_id].term_freq()))
                     
-                    # Increment our current doc
-                    current_file_id += 1
-                    
-        elif feature_value_type == 2:
-            # Compute idf
-            # Go through each document in newsgroups dir
-            for root, _, files in walk(newsgroups_root_dir):
-                # Find and write out the class label
-                local_dir = root.split(sep)[-1]
+                # Write newline to signify end of file
+                # outf.write("\n")
+                outf.write(" ".join(sorted(data_set, key=lambda x: int(x.split(':')[0]))) + "\n")
+                # outf.flush()
                 
-                # For each file...
-                for file in files:
-                    outf.write(class_def_helper(local_dir) + " ")
-                    print(root, file)
+                # Increment our current doc
+                current_file_id += 1
+     
+    current_file_id = 1     
+    with open(training_data_path + ".IDF", 'w') as outf:
+        # Compute idf
+        # Go through each document in newsgroups dir
+        for root, _, files in walk(newsgroups_root_dir):
+            # Find and write out the class label
+            local_dir = root.split(sep)[-1]
+            
+            # For each file...
+            for file in files:
+                outf.write(class_def_helper(local_dir) + " ")
+                print(root, file)
+                
+                # Get the words from the doc
+                stemmed_token_list = preprocess_doc(root + sep + file)
+                
+                # Put all the info into a set (for uniqueness)
+                data_set = set()
+                
+                # Now that we've re-done all that, find idfs
+                for word in stemmed_token_list:
+                    # Skip blank stopwords
+                    if word == "": continue
                     
-                    # Get the words from the doc
-                    stemmed_token_list = preprocess_doc(root + sep + file)
+                    # Get the term ID
+                    #outf.write(ft_dict[word] + ":" + str(ii.idf(word))
+                    #    + " ") 
+                    data_set.add(ft_dict[word] + ":" + str(ii.idf(word)))
                     
-                    # Put all the info into a set (for uniqueness)
-                    data_set = set()
-                    
-                    # Now that we've re-done all that, find idfs
-                    for word in stemmed_token_list:
-                        # Skip blank stopwords
-                        if word == "": continue
-                        
-                        # Get the term ID
-                        #outf.write(ft_dict[word] + ":" + str(ii.idf(word))
-                        #    + " ") 
-                        data_set.add(ft_dict[word] + ":" + str(ii.idf(word)))
-                        
-                    # Write newline to signify end of file
-                    outf.write(" ".join(sorted(data_set, key=lambda x: int(x.split(':')[0]))) + "\n")
-                    #outf.flush()
-                    
-        else:
-            print("Invalid feature type! Abort.")
-            exit(1)
+                # Write newline to signify end of file
+                outf.write(" ".join(sorted(data_set, key=lambda x: int(x.split(':')[0]))) + "\n")
             
             
 def class_def_helper(dir):
