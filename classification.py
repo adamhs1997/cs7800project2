@@ -8,10 +8,17 @@ from sklearn.naive_bayes import BernoulliNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.model_selection import cross_val_score
+from warnings import filterwarnings
+
+# The cross-validation code seems to split classes in such a way that some
+#   of the five newsgroups classes are not trained on, but they are tested.
+#   This yields some warnings about ill-defined classes, though the system
+#   still reports scores. We suppress these here.
+filterwarnings("ignore")
 
 # Import the libSVM data file
 # --Testing only done on the TF-IDF data
-feature_vectors, targets = load_svmlight_file(r"training_data.txt")
+feature_vectors, targets = load_svmlight_file(r"training_data.txt.TFIDF")
 
 # Evaluate multinomial NBC
 print("--Multinomial NBC--")
