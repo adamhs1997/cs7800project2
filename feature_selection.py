@@ -103,20 +103,20 @@ def main():
         svm_mi_scores.append((k, scores.mean(), scores.std()))
         print()
 
-    plot_scores(mnbc_x2_scores, mnbc_mi_scores, "mnbc_scores.png")
-    plot_scores(bnbc_x2_scores, bnbc_mi_scores, "bnbc_scores.png")
-    plot_scores(knn_x2_scores, knn_mi_scores, "knn_scores.png")
-    plot_scores(svm_x2_scores, svm_mi_scores, "svm_scores.png")
+    plot_scores(mnbc_x2_scores, mnbc_mi_scores, "Multinomial NBC", "mnbc_scores.png")
+    plot_scores(bnbc_x2_scores, bnbc_mi_scores, "Bernoulli NBC", "bnbc_scores.png")
+    plot_scores(knn_x2_scores, knn_mi_scores, "KNN", "knn_scores.png")
+    plot_scores(svm_x2_scores, svm_mi_scores, "SVM", "svm_scores.png")
   
     
-def plot_scores(x2_scores_raw, mi_scores_raw, title):
+def plot_scores(x2_scores_raw, mi_scores_raw, title, outfile):
     # Set up the plot
     plt.figure()
-    plt.title("Multinomial NBC")
+    plt.title(title)
     plt.xlabel("K Value")
     plt.ylabel("F1 Score")
-    x2_scores = np.array(mnbc_x2_scores)
-    mi_scores = np.array(mnbc_mi_scores)
+    x2_scores = np.array(x2_scores_raw)
+    mi_scores = np.array(mi_scores_raw)
     plt.grid()
 
     # Chart the standard deviations and points
@@ -131,8 +131,8 @@ def plot_scores(x2_scores_raw, mi_scores_raw, title):
 
     # Save off the figure    
     plt.legend(loc="best")
-    plt.savefig(title)
-    print("Saved figure", title)
+    plt.savefig(outfile)
+    print("Saved figure", outfile)
 
     
 if __name__ == "__main__":
