@@ -20,14 +20,16 @@ filterwarnings("ignore")
 # --Testing only done on the TF-IDF data
 x, y = load_svmlight_file(r"training_data.txt.TFIDF")
 
+# For AC, we need x to be dense array
+ac_x = x.toarray()
 
 # Run thorugh n values from 2 to 25:
-for n in range(2, 26):
+for n in range(2, 6):
     print("N:", n)
     # Initialize our clusterers
     kmeans_model = KMeans(n_clusters=n).fit(x)
     single_linkage_model = AgglomerativeClustering(
-            n_clusters=n, linkage='ward').fit(x.toarray())
+            n_clusters=n, linkage='ward').fit(ac_x)
             
     # Get the scores
     clustering_labels = kmeans_model.labels_
@@ -37,7 +39,7 @@ for n in range(2, 26):
 
     clustering_labels = single_linkage_model.labels_
     print("AC SI", metrics.silhouette_score(
-        x, clustering_labels, metric='euclidean'))
+        ac_x, clustering_labels, metric='euclidean'))
     print("KM NMI", metrics.normalized_mutual_info_score(y, clustering_labels))
     print()
         
