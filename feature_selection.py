@@ -43,6 +43,8 @@ def main():
     knn_mi_scores = []
     svm_x2_scores = []
     svm_mi_scores = []
+    svml_x2_scores = []
+    svml_mi_scores = []
 
     # Test our classifiers
     for k in k_values:
@@ -90,23 +92,37 @@ def main():
         knn_mi_scores.append((k, scores.mean(), scores.std()))
         print()
         
-        print("--SVM, K-Value {}, Chi-Squared--".format(k))
+        print("--SVM (default kernel), K-Value {}, Chi-Squared--".format(k))
         clf = SVC()
         scores = cross_val_score(clf, x_new1, y, cv=5, scoring='f1_macro')
         print("F1 Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
         svm_x2_scores.append((k, scores.mean(), scores.std()))
         print()
         
-        print("--SVM, K-Value {}, MI--".format(k))
+        print("--SVM (default kernel), K-Value {}, MI--".format(k))
         scores = cross_val_score(clf, x_new2, y, cv=5, scoring='f1_macro')
         print("F1 Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
         svm_mi_scores.append((k, scores.mean(), scores.std()))
+        print()
+        
+        print("--SVM (linear kernel), K-Value {}, Chi-Squared--".format(k))
+        clf = SVC(kernel="linear")
+        scores = cross_val_score(clf, x_new1, y, cv=5, scoring='f1_macro')
+        print("F1 Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
+        svml_x2_scores.append((k, scores.mean(), scores.std()))
+        print()
+        
+        print("--SVM (linear kernel), K-Value {}, MI--".format(k))
+        scores = cross_val_score(clf, x_new2, y, cv=5, scoring='f1_macro')
+        print("F1 Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
+        svml_mi_scores.append((k, scores.mean(), scores.std()))
         print()
 
     plot_scores(mnbc_x2_scores, mnbc_mi_scores, "Multinomial NBC", "mnbc_scores.png")
     plot_scores(bnbc_x2_scores, bnbc_mi_scores, "Bernoulli NBC", "bnbc_scores.png")
     plot_scores(knn_x2_scores, knn_mi_scores, "KNN", "knn_scores.png")
-    plot_scores(svm_x2_scores, svm_mi_scores, "SVM", "svm_scores.png")
+    plot_scores(svm_x2_scores, svm_mi_scores, "SVM (default kernel)", "svmd_scores.png")
+    plot_scores(svml_x2_scores, svml_mi_scores, "SVM (linear kernel)", "svml_scores.png")
   
     
 def plot_scores(x2_scores_raw, mi_scores_raw, title, outfile):
